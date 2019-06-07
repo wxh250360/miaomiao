@@ -1,41 +1,53 @@
 <template>
   <div class="movie_body">
-    <ul>
-      <li v-for="item in comingList" :key="item.id">
-        <div class="pic_show">
-          <img :src="item.img | setWH(128.180)">
-        </div>
-        <div class="info_list">
-          <h2>{{ item.nm }} <img v-if="item.version" src="@/assets/logo.png"></h2>
-          <p>
-            <span class="person">{{ item.wish }}</span> 人想看
-          </p>
-          <p>{{ item.star }}</p>
-          <p>{{ item.rt }}</p>
-        </div>
-        <div class="btn_pre">预售</div>
-      </li>
-    </ul>
+    <Loading v-if="isLoading" />
+    <Scroller v-else>
+      <ul>
+        <li v-for="item in comingList" :key="item.id">
+          <div class="pic_show">
+            <img :src="item.img | setWH(64.88)">
+          </div>
+          <div class="info_list">
+            <h2>
+              {{ item.nm }}
+              <img v-if="item.version" src="@/assets/logo.png">
+            </h2>
+            <p>
+              <span class="person">{{ item.wish }}</span> 人想看
+            </p>
+            <p>{{ item.star }}</p>
+            <p>{{ item.rt }}</p>
+          </div>
+          <div class="btn_pre">预售</div>
+        </li>
+      </ul>
+    </Scroller>
   </div>
 </template>
 
 <script>
 export default {
   name: "comingsoon",
-  data(){
+  data() {
     return {
-      comingList:[]
-    }
+      comingList: [],
+      isLoading: true,
+      prevCityId: -1
+    };
   },
-  mounted(){
-    this.axios.get('/api/movieOnInfoList?cityId=10').then((res)=>{
+  activated() {
+    var cityId = this.$store.state.city.id;
+    if( this.prevCityId === cityId){return;}
+    this.isLoading = true;
+    this.axios.get("/api/movieOnInfoList?cityId=10" + cityId).then(res => {
       var msg = res.data.msg;
-      if(msg === 'ok'){
-          this.comingList = res.data.data.movieList;
+      if (msg === "ok") {
+        this.isLoading = false;
+        this.comingList = res.data.data.movieList;
+        this.prevCityId = cityId;
       }
-      console.log(this.comingList);
-      
-    })
+      // console.log(this.comingList);
+    });
   }
 };
 </script>

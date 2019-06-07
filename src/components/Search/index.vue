@@ -50,7 +50,7 @@ export default {
       var that = this;
       this.cancelRequest();
       // console.log(newVal);
-      this.axios.get('/api/searchList?cityId=10&kw=a' + newVal, {
+      this.axios.get('/api/searchList?cityId=10&kw=a' + cityId + '&kw=' + newVal, {
         cancelToken:new this.axios.CancelToken(function(c) {
           that.source = c;
         })

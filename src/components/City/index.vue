@@ -1,72 +1,17 @@
 <template>
   <div class="city_body">
-    <div class="city_list">
+    <!--<div class="city_list">
       <div class="city_hot">
         <h2>热门城市</h2>
-        <ul class="clearfix">
+         <ul class="clearfix">
           <li>上海</li>
-          <li>北京</li>
-          <li>上海</li>
-          <li>北京</li>
-          <li>上海</li>
-          <li>北京</li>
-          <li>上海</li>
-          <li>北京</li>
         </ul>
       </div>
       <div class="city_sort">
         <div>
           <h2>A</h2>
           <ul>
-            <li>阿拉善盟</li>
-            <li>鞍山</li>
-            <li>安庆</li>
-            <li>安阳</li>
-          </ul>
-        </div>
-        <div>
-          <h2>B</h2>
-          <ul>
-            <li>北京</li>
-            <li>保定</li>
-            <li>蚌埠</li>
-            <li>包头</li>
-          </ul>
-        </div>
-        <div>
-          <h2>A</h2>
-          <ul>
-            <li>阿拉善盟</li>
-            <li>鞍山</li>
-            <li>安庆</li>
-            <li>安阳</li>
-          </ul>
-        </div>
-        <div>
-          <h2>B</h2>
-          <ul>
-            <li>北京</li>
-            <li>保定</li>
-            <li>蚌埠</li>
-            <li>包头</li>
-          </ul>
-        </div>
-        <div>
-          <h2>A</h2>
-          <ul>
-            <li>阿拉善盟</li>
-            <li>鞍山</li>
-            <li>安庆</li>
-            <li>安阳</li>
-          </ul>
-        </div>
-        <div>
-          <h2>B</h2>
-          <ul>
-            <li>北京</li>
-            <li>保定</li>
-            <li>蚌埠</li>
-            <li>包头</li>
+            <li>阿拉善盟</li> 
           </ul>
         </div>
       </div>
@@ -79,13 +24,121 @@
         <li>D</li>
         <li>E</li>
       </ul>
+    </div>-->
+    <div class="city_list">
+      <div class="city_hot">
+        <h2>热门城市</h2>
+        <ul class="clearfix">
+          <li v-for="item in hotList" :key="item.id">{{ item.nm }}</li>
+        </ul>
+      </div>
+
+      <div class="city_sort" ref="city_sort">
+        <div v-for="item in cityList" :key="item.index">
+          <h2>{{ item.index }}</h2>
+          <ul>
+            <li v-for="itemList in item.list" :key="itemList.id">{{ itemList.nm }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="city_index">
+      <ul>
+        <li v-for="(item,index) in cityList" :key="item.index" @touchstart="handleToIndex(index)">{{ item.index }}</li>
+      </ul>
     </div>
   </div>
 </template>
 
 <script>
+import { log } from "util";
 export default {
-  name: "city"
+  name: "city",
+  data() {
+    return {
+      cityList: [],
+      hotList: []
+    };
+  },
+  mounted() {
+    this.axios.get("/api/cityList").then(res => {
+      //   console.log(res);
+      var msg = res.data.msg;
+      if (msg === "ok") {
+        var cities = res.data.data.cities;
+        // [ { index : 'A', list: [{ nm: '阿成', id: 123 }] } ]
+        var { cityList, hotList } = this.formatCityList(cities);
+        // console.log(a);
+        this.cityList = cityList;
+        this.hotList = hotList;
+      }
+    });
+  },
+  methods: {
+    formatCityList(cities) {
+      var cityList = [];
+      var hotList = [];
+      // var a = 1;
+      for (var i = 0; i < cities.length; i++) {
+        var firstLetter = cities[i].py.substring(0, 1).toUpperCase();
+
+        if (toCom(firstLetter)) {
+          // 新添加index
+          //   console.log('a');
+
+          cityList.push({
+            index: firstLetter,
+            list: [{ nm: cities[i].nm, id: cities[i].id }]
+          });
+        } else {
+          //累加到已有index
+          for (var j = 0; j < cityList.length; j++) {
+            if (cityList[j].index === firstLetter) {
+              cityList[j].list.push({ nm: cities[i].nm, id: cities[i].id });
+            }
+          }
+        }
+      }
+
+      function toCom(firstLetter) {
+        for (var i = 0; i < cityList.length; i++) {
+          if (cityList[i].index === firstLetter) {
+            return false;
+          }
+        }
+        return true;
+      }
+      // 按index排序
+      cityList.sort((n1, n2) => {
+        if (n1.index > n2.index) {
+          return 1;
+        } else if (n1.index < n2.index) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+      //   console.log(cityList);
+
+      // 热门城市
+      for (var i = 0; i < cities.length; i++) {
+        if (cities[i].isHot == true) {
+          hotList.push(cities[i]);
+        }
+      }
+      //   console.log(hotList);
+      return {
+        cityList,
+        hotList
+      };
+    },
+    handleToIndex(index){
+        var h2 = this.$refs.city_sort.getElementsByTagName('h2');
+        // console.log(this.$refs.city_sort.getElementsByTagName('h2'));   
+        // console.log(index);
+        this.$refs.city_sort.parentNode.scrollTop= h2[index].offsetTop;
+    }
+  }
 };
 </script>
 

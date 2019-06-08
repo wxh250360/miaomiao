@@ -4,11 +4,11 @@
     <Scroller v-else>
       <ul>
         <li v-for="item in comingList" :key="item.id">
-          <div class="pic_show">
+          <div class="pic_show" @tap="handleToDetail(item.id)">
             <img :src="item.img | setWH(64.88)">
           </div>
           <div class="info_list">
-            <h2>
+            <h2 @tap="handleToDetail(item.id)">
               {{ item.nm }}
               <img v-if="item.version" src="@/assets/logo.png">
             </h2>
@@ -34,6 +34,12 @@ export default {
       isLoading: true,
       prevCityId: -1
     };
+  },
+  methods: {
+     handleToDetail(movieId) {
+      // console.log(movieId);
+      this.$router.push('/movie/detail/2/' + movieId)
+    },
   },
   activated() {
     var cityId = this.$store.state.city.id;

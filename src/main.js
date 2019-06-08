@@ -6,7 +6,7 @@ import store from './stores'
 import axios from 'axios'
 Vue.prototype.axios = axios;
 
-Vue.filter('setWH',(url, arg)=>{
+Vue.filter('setWH',(url='', arg)=>{
   return url.replace(/w\.h/, arg);
 })
 
